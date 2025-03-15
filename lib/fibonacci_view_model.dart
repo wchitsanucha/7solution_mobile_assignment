@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
+import 'package:seven_solutions_mobile_assignment/model/fibonacci_item_list.dart';
 
 class FibonacciViewModel {
   final List<FibonacciItem> _fibonacciList = <FibonacciItem>[];
@@ -14,21 +15,17 @@ class FibonacciViewModel {
   final _fibonacciListController = StreamController<List<FibonacciItem>>();
   get fibonacciListStream => _fibonacciListController.stream;
 
-  final _circleListController =
-      StreamController<List<FibonacciItem>>.broadcast();
+  final _circleListController = StreamController<FibonacciItemList>.broadcast();
   get circleListStream => _circleListController.stream;
 
-  final _squareListController =
-      StreamController<List<FibonacciItem>>.broadcast();
+  final _squareListController = StreamController<FibonacciItemList>.broadcast();
   get squareListStream => _squareListController.stream;
 
-  final _crossListController =
-      StreamController<List<FibonacciItem>>.broadcast();
+  final _crossListController = StreamController<FibonacciItemList>.broadcast();
   get crossListStream => _crossListController.stream;
 
   init() {
     generateFibonacci(40); // Generate first 40 Fibonacci numbers
-    _fibonacciListController.sink.add(_fibonacciList);
   }
 
   dispose() {
@@ -42,19 +39,40 @@ class FibonacciViewModel {
     switch (item.symbol) {
       case PatternSymbol.circle:
         _circleList.add(item);
-        _circleListController.sink.add(_circleList);
+        _circleList.sort((a, b) => a.id.compareTo(b.id));
+        _circleListController.sink.add(
+          FibonacciItemList(
+            item.id,
+            _circleList,
+          ),
+        );
         debugPrint("Circle added: ${item.id}");
         break;
+
       case PatternSymbol.square:
         _squareList.add(item);
-        _squareListController.sink.add(_squareList);
+        _squareList.sort((a, b) => a.id.compareTo(b.id));
+        _squareListController.sink.add(
+          FibonacciItemList(
+            item.id,
+            _squareList,
+          ),
+        );
         debugPrint("Square added: ${item.id}");
         break;
+
       case PatternSymbol.cross:
         _crossList.add(item);
-        _crossListController.sink.add(_crossList);
+        _crossList.sort((a, b) => a.id.compareTo(b.id));
+        _crossListController.sink.add(
+          FibonacciItemList(
+            item.id,
+            _crossList,
+          ),
+        );
         debugPrint("Cross added: ${item.id}");
         break;
+
       default:
         debugPrint("Something went wrong !!!");
         break;
@@ -92,5 +110,7 @@ class FibonacciViewModel {
         FibonacciItem(index, value, symbol),
       );
     }
+
+    _fibonacciListController.sink.add(_fibonacciList);
   }
 }

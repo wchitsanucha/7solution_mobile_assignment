@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
 import 'package:seven_solutions_mobile_assignment/fibonacci_view_model.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
+import 'package:seven_solutions_mobile_assignment/model/fibonacci_item_list.dart';
 
 class FibonacciListScreen extends StatefulWidget {
   const FibonacciListScreen({super.key});
@@ -16,9 +17,9 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   late final FibonacciViewModel _viewModel;
   late final ScrollController _scrollController;
 
-  late StreamSubscription<List<FibonacciItem>> _circleStreamSubscription;
-  late StreamSubscription<List<FibonacciItem>> _squareStreamSubscription;
-  late StreamSubscription<List<FibonacciItem>> _crossStreamSubscription;
+  late final StreamSubscription<FibonacciItemList> _circleStreamSubscription;
+  late final StreamSubscription<FibonacciItemList> _squareStreamSubscription;
+  late final StreamSubscription<FibonacciItemList> _crossStreamSubscription;
 
   void _onScroll() {
     if (_scrollController.position.pixels ==
@@ -37,20 +38,20 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     _viewModel.init();
 
     _circleStreamSubscription =
-        _viewModel.circleListStream.listen((List<FibonacciItem> items) {
-      showModalList(items);
+        _viewModel.circleListStream.listen((FibonacciItemList fibList) {
+      showModalList(fibList);
       debugPrint("circleListStream called");
     });
 
     _squareStreamSubscription =
-        _viewModel.squareListStream.listen((List<FibonacciItem> items) {
-      showModalList(items);
+        _viewModel.squareListStream.listen((FibonacciItemList fibList) {
+      showModalList(fibList);
       debugPrint("squareListStream called");
     });
 
     _crossStreamSubscription =
-        _viewModel.crossListStream.listen((List<FibonacciItem> items) {
-      showModalList(items);
+        _viewModel.crossListStream.listen((FibonacciItemList fibList) {
+      showModalList(fibList);
       debugPrint("crossListStream called");
     });
   }
@@ -97,7 +98,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
             return ListView.separated(
               controller: _scrollController,
               itemCount: fibonacciList.length,
-              separatorBuilder: (context, index) => const Divider(
+              separatorBuilder: (_, __) => const Divider(
                 height: 0,
                 indent: 14,
                 endIndent: 14,
@@ -123,7 +124,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                     child: CircleAvatar(
                       radius: 16,
                       backgroundColor: Colors.white,
-                      child: Text('${item.id + 1}'),
+                      child: Text('${item.id}'),
                     ),
                   ),
                   title: Text('Number: ${item.value}'),
@@ -140,7 +141,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     );
   }
 
-  void showModalList(List<FibonacciItem> items) {
+  void showModalList(FibonacciItemList fibList) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -151,39 +152,56 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
         return FractionallySizedBox(
           heightFactor: 0.5,
           child: ListView.separated(
-            itemCount: items.length,
+            padding: const EdgeInsets.only(top: 16),
+            itemCount: fibList.items.length,
             separatorBuilder: (_, __) => const Divider(
               height: 0,
               indent: 14,
               endIndent: 14,
             ),
             itemBuilder: (context, index) {
-              final FibonacciItem item = items[index];
+              final FibonacciItem item = fibList.items[index];
 
-              return ListTile(
-                onTap: () {
-                  debugPrint("Remove idx back: $index => ${item.value}");
-                },
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 3,
-                  horizontal: 16,
-                ),
-                leading: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
+              return Container(
+                color: fibList.selectedId == item.id
+                    ? Colors.greenAccent[400]
+                    : null,
+                child: ListTile(
+                  onTap: () {
+                    debugPrint("Remove idx back: $index => ${item.value}");
+                  },
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 3,
+                    horizontal: 16,
                   ),
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.white,
-                    child: Text('${item.id + 1}'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: fibList.selectedId == item.id
+                          ? Colors.greenAccent[400]
+                          : Colors.white,
+                      child: Text('${item.id}'),
+                    ),
                   ),
-                ),
-                title: Text('Number: ${item.value}'),
-                trailing: Icon(
-                  PatternSet.getSymbol(item.symbol),
-                  color: Colors.blue[800],
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Number: ${item.value}'),
+                      Text(
+                        'Index: ${item.id}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  trailing: Icon(
+                    PatternSet.getSymbol(item.symbol),
+                    color: Colors.blue[800],
+                  ),
                 ),
               );
             },
