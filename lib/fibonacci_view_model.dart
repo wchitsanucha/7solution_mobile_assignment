@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
@@ -12,23 +13,22 @@ class FibonacciViewModel {
 
   final _fibonacciListController = StreamController<List<FibonacciItem>>();
   get fibonacciListStream => _fibonacciListController.stream;
-  get fibonacciList => _fibonacciList;
 
-  final _circleListController = StreamController<List<FibonacciItem>>();
+  final _circleListController =
+      StreamController<List<FibonacciItem>>.broadcast();
   get circleListStream => _circleListController.stream;
-  get circleList => _circleList;
 
-  final _squareListController = StreamController<List<FibonacciItem>>();
+  final _squareListController =
+      StreamController<List<FibonacciItem>>.broadcast();
   get squareListStream => _squareListController.stream;
-  get squareList => _squareList;
 
-  final _crossListController = StreamController<List<FibonacciItem>>();
+  final _crossListController =
+      StreamController<List<FibonacciItem>>.broadcast();
   get crossListStream => _crossListController.stream;
-  get crossList => _crossList;
 
   init() {
     generateFibonacci(40); // Generate first 40 Fibonacci numbers
-    _fibonacciListController.add(_fibonacciList);
+    _fibonacciListController.sink.add(_fibonacciList);
   }
 
   dispose() {
@@ -38,23 +38,36 @@ class FibonacciViewModel {
     _crossListController.close();
   }
 
-  // increaseCounter() {
-  //   _counter += _counterRepository.getIncrement();
-  //   _counterController.sink.add(_counter);
-  // }
-
   void addItemToList(FibonacciItem item) {
     switch (item.symbol) {
       case PatternSymbol.circle:
-        return _circleList.add(item);
+        _circleList.add(item);
+        _circleListController.sink.add(_circleList);
+        debugPrint("Circle added: ${item.id}");
+        break;
       case PatternSymbol.square:
-        return _squareList.add(item);
+        _squareList.add(item);
+        _squareListController.sink.add(_squareList);
+        debugPrint("Square added: ${item.id}");
+        break;
       case PatternSymbol.cross:
-        return _crossList.add(item);
+        _crossList.add(item);
+        _crossListController.sink.add(_crossList);
+        debugPrint("Cross added: ${item.id}");
+        break;
       default:
         debugPrint("Something went wrong !!!");
         break;
     }
+
+    _fibonacciList.removeWhere((element) => element.id == item.id);
+    _fibonacciListController.sink.add(_fibonacciList);
+
+    // inspect(_fibonacciList);
+    // inspect(_circleList);
+    // inspect(_squareList);
+    // inspect(_crossList);
+    // debugPrint("--------------------");
   }
 
   void generateFibonacci(int count) {
@@ -73,20 +86,11 @@ class FibonacciViewModel {
       }
 
       // Attach the symbol directly
-      PatternSymbol symbol = _getSymbolByIndex(index);
+      PatternSymbol symbol = PatternSet.getSymbolByIndex(index);
 
       _fibonacciList.add(
         FibonacciItem(index, value, symbol),
       );
     }
-  }
-
-  PatternSymbol _getSymbolByIndex(int index) {
-    int patternIndex = (index ~/ 4) % 2; // Switch between pattern A and B
-    int symbolIndex = index % 4; // Get symbol within the pattern
-
-    // debugPrint("@@@ Index $index => $patternIndex, $symbolIndex");
-
-    return PatternSet.patterns[patternIndex][symbolIndex];
   }
 }

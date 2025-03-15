@@ -20,6 +20,15 @@ class PatternSet {
     ], // Pattern B
   ];
 
+  static PatternSymbol getSymbolByIndex(int index) {
+    int patternIndex = (index ~/ 4) % 2; // Switch between pattern A and B
+    int symbolIndex = index % 4; // Get symbol within the pattern
+
+    // debugPrint("@@@ Index $index => $patternIndex, $symbolIndex");
+
+    return PatternSet.patterns[patternIndex][symbolIndex];
+  }
+
   static IconData getSymbol(PatternSymbol symbol) {
     switch (symbol) {
       case PatternSymbol.circle:
