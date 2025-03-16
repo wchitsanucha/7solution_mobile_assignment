@@ -1,11 +1,11 @@
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
 
-class FibonacciItemList {
-  final int selectedId;
+class FibonacciListWrapper {
   final List<FibonacciItem> items;
+  final int? selectedId;
 
-  FibonacciItemList(
-    this.selectedId,
+  FibonacciListWrapper(
     this.items,
+    this.selectedId,
   );
 }

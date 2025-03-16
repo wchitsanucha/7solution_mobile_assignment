@@ -17,9 +17,9 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   late final FibonacciViewModel _viewModel;
   late final ScrollController _scrollController;
 
-  late final StreamSubscription<FibonacciItemList> _circleStreamSubscription;
-  late final StreamSubscription<FibonacciItemList> _squareStreamSubscription;
-  late final StreamSubscription<FibonacciItemList> _crossStreamSubscription;
+  late final StreamSubscription<FibonacciListWrapper> _circleStreamSubscription;
+  late final StreamSubscription<FibonacciListWrapper> _squareStreamSubscription;
+  late final StreamSubscription<FibonacciListWrapper> _crossStreamSubscription;
 
   void _onScroll() {
     if (_scrollController.position.pixels ==
@@ -38,19 +38,19 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     _viewModel.init();
 
     _circleStreamSubscription =
-        _viewModel.circleListStream.listen((FibonacciItemList fibList) {
+        _viewModel.circleListStream.listen((FibonacciListWrapper fibList) {
       showModalList(fibList);
       debugPrint("circleListStream called");
     });
 
     _squareStreamSubscription =
-        _viewModel.squareListStream.listen((FibonacciItemList fibList) {
+        _viewModel.squareListStream.listen((FibonacciListWrapper fibList) {
       showModalList(fibList);
       debugPrint("squareListStream called");
     });
 
     _crossStreamSubscription =
-        _viewModel.crossListStream.listen((FibonacciItemList fibList) {
+        _viewModel.crossListStream.listen((FibonacciListWrapper fibList) {
       showModalList(fibList);
       debugPrint("crossListStream called");
     });
@@ -80,7 +80,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
         ),
         centerTitle: true,
       ),
-      body: StreamBuilder<List<FibonacciItem>>(
+      body: StreamBuilder<FibonacciListWrapper>(
         stream: _viewModel.fibonacciListStream,
         builder: (context, snapshot) {
           debugPrint("fibonacciListStream got update.");
@@ -93,18 +93,19 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
               child: Text('Error: ${snapshot.error}'),
             );
           } else {
-            final List<FibonacciItem> fibonacciList = snapshot.data!;
+            final FibonacciListWrapper fibonacciList = snapshot.data!;
+            final int? popItemId = fibonacciList.selectedId;
 
             return ListView.separated(
               controller: _scrollController,
-              itemCount: fibonacciList.length,
+              itemCount: fibonacciList.items.length,
               separatorBuilder: (_, __) => const Divider(
                 height: 0,
                 indent: 14,
                 endIndent: 14,
               ),
               itemBuilder: (context, index) {
-                final FibonacciItem item = fibonacciList[index];
+                final FibonacciItem item = fibonacciList.items[index];
 
                 return ListTile(
                   onTap: () {
@@ -114,7 +115,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                     vertical: 3,
                     horizontal: 16,
                   ),
-                  tileColor: Colors.white,
+                  tileColor: popItemId == item.id ? Colors.red : Colors.white,
                   leading: Container(
                     padding: const EdgeInsets.all(2),
                     decoration: const BoxDecoration(
@@ -141,7 +142,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     );
   }
 
-  void showModalList(FibonacciItemList fibList) {
+  void showModalList(FibonacciListWrapper fibList) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -168,6 +169,8 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                     : null,
                 child: ListTile(
                   onTap: () {
+                    _viewModel.removeItemFromList(item);
+                    Navigator.pop(context);
                     debugPrint("Remove idx back: $index => ${item.value}");
                   },
                   contentPadding: const EdgeInsets.symmetric(
@@ -182,9 +185,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                     ),
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: fibList.selectedId == item.id
-                          ? Colors.greenAccent[400]
-                          : Colors.white,
+                      backgroundColor: Colors.white,
                       child: Text('${item.id}'),
                     ),
                   ),
