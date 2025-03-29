@@ -68,6 +68,7 @@ class FibonacciViewModel {
       FibonacciListWrapper(
         _fibonacciList,
         popItemId,
+        _fibonacciList.indexOf(item),
       ),
     );
 
@@ -87,6 +88,7 @@ class FibonacciViewModel {
           FibonacciListWrapper(
             _circleList,
             item.id,
+            _circleList.indexOf(item),
           ),
         );
         debugPrint("Circle added: ${item.id}");
@@ -99,6 +101,7 @@ class FibonacciViewModel {
           FibonacciListWrapper(
             _squareList,
             item.id,
+            _squareList.indexOf(item),
           ),
         );
         debugPrint("Square added: ${item.id}");
@@ -111,6 +114,7 @@ class FibonacciViewModel {
           FibonacciListWrapper(
             _crossList,
             item.id,
+            _crossList.indexOf(item),
           ),
         );
         debugPrint("Cross added: ${item.id}");
@@ -137,6 +141,9 @@ class FibonacciViewModel {
   }
 
   void generateFibonacci(int count) {
+    // Set limit to 100 Fibonacci numbers
+    if (_fibonacciList.length + count > 100) return;
+
     int startIndex = _fibonacciList.length;
     for (int i = 0; i < count; i++) {
       int index = startIndex + i;
