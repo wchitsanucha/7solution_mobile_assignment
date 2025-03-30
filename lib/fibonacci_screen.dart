@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:seven_solutions_mobile_assignment/common/divider.dart';
+import 'package:seven_solutions_mobile_assignment/constant/colors.dart';
+import 'package:seven_solutions_mobile_assignment/constant/numbers.dart';
 import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
 import 'package:seven_solutions_mobile_assignment/fibonacci_view_model.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
@@ -16,6 +19,7 @@ class FibonacciListScreen extends StatefulWidget {
 
 class _FibonacciListScreenState extends State<FibonacciListScreen> {
   late final FibonacciViewModel _viewModel;
+
   late final ScrollController _mainScrollController;
   late final ScrollController _modalCircleScrollController;
   late final ScrollController _modalSquareScrollController;
@@ -30,7 +34,8 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   void _onScroll() {
     if (_mainScrollController.position.pixels ==
         _mainScrollController.position.maxScrollExtent) {
-      _viewModel.generateFibonacci(20); // generate more Fibonacci numbers
+      // generate more Fibonacci numbers
+      _viewModel.generateFibonacci(ConfigValues.generateFibNumber);
     }
   }
 
@@ -41,7 +46,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     listTileHeight =
         (PlatformDispatcher.instance.views.first.physicalSize.longestSide /
                 PlatformDispatcher.instance.views.first.devicePixelRatio) *
-            0.07;
+            ConfigValues.listTileHeightFactor;
 
     _viewModel = FibonacciViewModel();
     _mainScrollController = ScrollController();
@@ -93,8 +98,8 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   void scrollToIndex(ScrollController controller, int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.animateTo(
-        (index - 2) * listTileHeight,
-        duration: const Duration(milliseconds: 300),
+        (index - ConfigValues.listTileOffset) * listTileHeight,
+        duration: const Duration(milliseconds: ConfigValues.durationTime),
         curve: Curves.easeInOut,
       );
     });
@@ -104,7 +109,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent[100],
+        backgroundColor: ColorStyle.appBar,
         title: const Text(
           'Fibonacci List',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -134,22 +139,18 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
             return ListView.separated(
               controller: _mainScrollController,
               itemCount: fibonacciList.items.length,
-              separatorBuilder: (_, __) => const Divider(
-                height: 0,
-                indent: 14,
-                endIndent: 14,
-              ),
+              separatorBuilder: (_, __) => const CommonDivider(),
               itemBuilder: (context, index) {
                 final FibonacciItem item = fibonacciList.items[index];
 
                 return Container(
-                  color: popItemId == item.id ? Colors.red : Colors.white,
+                  color: popItemId == item.id
+                      ? ColorStyle.popHighlight
+                      : ColorStyle.listTile,
                   height: listTileHeight,
                   alignment: Alignment.center,
                   child: ListTile(
-                    onTap: () {
-                      _viewModel.addItemToList(item);
-                    },
+                    onTap: () => _viewModel.addItemToList(item),
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 3,
                       horizontal: 16,
@@ -157,19 +158,19 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                     leading: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: const BoxDecoration(
-                        color: Colors.blue,
+                        color: ColorStyle.symbol,
                         shape: BoxShape.circle,
                       ),
                       child: CircleAvatar(
                         radius: 16,
-                        backgroundColor: Colors.white,
+                        backgroundColor: ColorStyle.listTile,
                         child: Text('${item.id}'),
                       ),
                     ),
                     title: Text('Number: ${item.value}'),
                     trailing: Icon(
                       PatternSet.getSymbol(item.symbol),
-                      color: Colors.blue[800],
+                      color: ColorStyle.symbol,
                     ),
                   ),
                 );
@@ -198,17 +199,13 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
             controller: controller,
             padding: const EdgeInsets.only(top: 16),
             itemCount: fibList.items.length,
-            separatorBuilder: (_, __) => const Divider(
-              height: 0,
-              indent: 14,
-              endIndent: 14,
-            ),
+            separatorBuilder: (_, __) => const CommonDivider(),
             itemBuilder: (context, index) {
               final FibonacciItem item = fibList.items[index];
 
               return Container(
                 color: fibList.selectedId == item.id
-                    ? Colors.greenAccent[400]
+                    ? ColorStyle.pushHighlight
                     : null,
                 height: listTileHeight,
                 alignment: Alignment.center,
@@ -225,19 +222,19 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(2),
                     decoration: const BoxDecoration(
-                      color: Colors.blue,
+                      color: ColorStyle.symbol,
                       shape: BoxShape.circle,
                     ),
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: Colors.white,
+                      backgroundColor: ColorStyle.listTile,
                       child: Text('${item.id}'),
                     ),
                   ),
                   title: Text('Number: ${item.value}'),
                   trailing: Icon(
                     PatternSet.getSymbol(item.symbol),
-                    color: Colors.blue[800],
+                    color: ColorStyle.symbol,
                   ),
                 ),
               );

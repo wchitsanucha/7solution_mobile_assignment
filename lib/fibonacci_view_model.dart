@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:seven_solutions_mobile_assignment/constant/numbers.dart';
 import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item_list.dart';
@@ -14,22 +15,20 @@ class FibonacciViewModel {
   final _fibonacciListController = StreamController<FibonacciListWrapper>();
   get fibonacciListStream => _fibonacciListController.stream;
 
-  final _circleListController =
-      StreamController<FibonacciListWrapper>.broadcast();
+  final _circleListController = StreamController<FibonacciListWrapper>();
   get circleListStream => _circleListController.stream;
 
-  final _squareListController =
-      StreamController<FibonacciListWrapper>.broadcast();
+  final _squareListController = StreamController<FibonacciListWrapper>();
   get squareListStream => _squareListController.stream;
 
-  final _crossListController =
-      StreamController<FibonacciListWrapper>.broadcast();
+  final _crossListController = StreamController<FibonacciListWrapper>();
   get crossListStream => _crossListController.stream;
 
   int? popItemId;
 
   init() {
-    generateFibonacci(40); // Generate first 40 Fibonacci numbers
+    // Generate first 40 Fibonacci numbers
+    generateFibonacci(ConfigValues.initFibNumber);
   }
 
   dispose() {
@@ -142,7 +141,15 @@ class FibonacciViewModel {
 
   void generateFibonacci(int count) {
     // Set limit to 100 Fibonacci numbers
-    if (_fibonacciList.length + count > 100) return;
+    if (_fibonacciList.length +
+            _circleList.length +
+            _squareList.length +
+            _crossList.length +
+            count >
+        ConfigValues.limitFibNumber) {
+      debugPrint("Fibonacci list is full.");
+      return;
+    }
 
     int startIndex = _fibonacciList.length;
     for (int i = 0; i < count; i++) {
