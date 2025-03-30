@@ -29,7 +29,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   late final StreamSubscription<FibonacciListWrapper> _squareStreamSubscription;
   late final StreamSubscription<FibonacciListWrapper> _crossStreamSubscription;
 
-  late final double listTileHeight;
+  late final double _listTileHeight;
 
   void _onScrollEnd() {
     if (_mainScrollController.position.pixels ==
@@ -43,7 +43,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
   void initState() {
     super.initState();
 
-    listTileHeight =
+    _listTileHeight =
         (PlatformDispatcher.instance.views.first.physicalSize.longestSide /
                 PlatformDispatcher.instance.views.first.devicePixelRatio) *
             ConfigValues.listTileHeightFactor;
@@ -57,7 +57,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     _mainScrollController.addListener(_onScrollEnd);
     _viewModel.init();
 
-    subscribeStream();
+    _subscribeStream();
   }
 
   @override
@@ -105,7 +105,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
             final int? popItemId = fibonacciList.selectedId;
 
             if (fibonacciList.itemIndex != null) {
-              scrollToIndex(_mainScrollController, fibonacciList.itemIndex!);
+              _scrollToIndex(_mainScrollController, fibonacciList.itemIndex!);
             }
 
             return ListView.separated(
@@ -117,7 +117,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
 
                 return CommonListTile(
                   item: item,
-                  listTileHeight: listTileHeight,
+                  listTileHeight: _listTileHeight,
                   onPressed: () => _viewModel.addItemToList(item),
                   highlightId: popItemId,
                   highlightColor: ColorStyle.popHighlight,
@@ -130,40 +130,40 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     );
   }
 
-  void subscribeStream() {
+  void _subscribeStream() {
     _circleStreamSubscription =
         _viewModel.circleListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalCircleScrollController);
-      scrollToIndex(_modalCircleScrollController, fibList.itemIndex!);
+      _showModalList(fibList, _modalCircleScrollController);
+      _scrollToIndex(_modalCircleScrollController, fibList.itemIndex!);
       debugPrint("circleListStream called");
     });
 
     _squareStreamSubscription =
         _viewModel.squareListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalSquareScrollController);
-      scrollToIndex(_modalSquareScrollController, fibList.itemIndex!);
+      _showModalList(fibList, _modalSquareScrollController);
+      _scrollToIndex(_modalSquareScrollController, fibList.itemIndex!);
       debugPrint("squareListStream called");
     });
 
     _crossStreamSubscription =
         _viewModel.crossListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalCrossScrollController);
-      scrollToIndex(_modalCrossScrollController, fibList.itemIndex!);
+      _showModalList(fibList, _modalCrossScrollController);
+      _scrollToIndex(_modalCrossScrollController, fibList.itemIndex!);
       debugPrint("crossListStream called");
     });
   }
 
-  void scrollToIndex(ScrollController controller, int index) {
+  void _scrollToIndex(ScrollController controller, int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.animateTo(
-        (index - ConfigValues.listTileOffset) * listTileHeight,
+        (index - ConfigValues.listTileOffset) * _listTileHeight,
         duration: const Duration(milliseconds: ConfigValues.durationTime),
         curve: Curves.easeInOut,
       );
     });
   }
 
-  void showModalList(
+  void _showModalList(
     FibonacciListWrapper fibList,
     ScrollController controller,
   ) {
@@ -186,7 +186,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
 
               return CommonListTile(
                 item: item,
-                listTileHeight: listTileHeight,
+                listTileHeight: _listTileHeight,
                 onPressed: () {
                   _viewModel.removeItemFromList(item);
                   Navigator.pop(context);

@@ -24,7 +24,7 @@ class FibonacciViewModel {
   final _crossListController = StreamController<FibonacciListWrapper>();
   get crossListStream => _crossListController.stream;
 
-  int? popItemId;
+  int? _popItemId;
 
   init() {
     // Generate first 40 Fibonacci numbers
@@ -39,7 +39,7 @@ class FibonacciViewModel {
   }
 
   void removeItemFromList(FibonacciItem item) {
-    popItemId = item.id;
+    _popItemId = item.id;
     switch (item.symbol) {
       case PatternSymbol.circle:
         _circleList.removeWhere((element) => element.id == item.id);
@@ -66,16 +66,10 @@ class FibonacciViewModel {
     _fibonacciListController.sink.add(
       FibonacciListWrapper(
         _fibonacciList,
-        popItemId,
+        _popItemId,
         _fibonacciList.indexOf(item),
       ),
     );
-
-    // inspect(_fibonacciList);
-    // inspect(_circleList);
-    // inspect(_squareList);
-    // inspect(_crossList);
-    // debugPrint("--------------------");
   }
 
   void addItemToList(FibonacciItem item) {
@@ -128,15 +122,9 @@ class FibonacciViewModel {
     _fibonacciListController.sink.add(
       FibonacciListWrapper(
         _fibonacciList,
-        popItemId,
+        _popItemId,
       ),
     );
-
-    // inspect(_fibonacciList);
-    // inspect(_circleList);
-    // inspect(_squareList);
-    // inspect(_crossList);
-    // debugPrint("--------------------");
   }
 
   void generateFibonacci(int count) {
@@ -176,7 +164,7 @@ class FibonacciViewModel {
     _fibonacciListController.sink.add(
       FibonacciListWrapper(
         _fibonacciList,
-        popItemId,
+        _popItemId,
       ),
     );
   }
