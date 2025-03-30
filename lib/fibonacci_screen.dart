@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:seven_solutions_mobile_assignment/common/divider.dart';
+import 'package:seven_solutions_mobile_assignment/common/common_divider.dart';
+import 'package:seven_solutions_mobile_assignment/common/common_list_tile.dart';
 import 'package:seven_solutions_mobile_assignment/constant/colors.dart';
 import 'package:seven_solutions_mobile_assignment/constant/numbers.dart';
-import 'package:seven_solutions_mobile_assignment/constant/pattern_symbol.dart';
 import 'package:seven_solutions_mobile_assignment/fibonacci_view_model.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item.dart';
 import 'package:seven_solutions_mobile_assignment/model/fibonacci_item_list.dart';
@@ -31,7 +31,7 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
 
   late final double listTileHeight;
 
-  void _onScroll() {
+  void _onScrollEnd() {
     if (_mainScrollController.position.pixels ==
         _mainScrollController.position.maxScrollExtent) {
       // generate more Fibonacci numbers
@@ -54,35 +54,17 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
     _modalSquareScrollController = ScrollController();
     _modalCrossScrollController = ScrollController();
 
-    _mainScrollController.addListener(_onScroll);
+    _mainScrollController.addListener(_onScrollEnd);
     _viewModel.init();
 
-    _circleStreamSubscription =
-        _viewModel.circleListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalCircleScrollController);
-      scrollToIndex(_modalCircleScrollController, fibList.itemIndex!);
-      debugPrint("circleListStream called");
-    });
-
-    _squareStreamSubscription =
-        _viewModel.squareListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalSquareScrollController);
-      scrollToIndex(_modalSquareScrollController, fibList.itemIndex!);
-      debugPrint("squareListStream called");
-    });
-
-    _crossStreamSubscription =
-        _viewModel.crossListStream.listen((FibonacciListWrapper fibList) {
-      showModalList(fibList, _modalCrossScrollController);
-      scrollToIndex(_modalCrossScrollController, fibList.itemIndex!);
-      debugPrint("crossListStream called");
-    });
+    subscribeStream();
   }
 
   @override
   void dispose() {
-    _mainScrollController.removeListener(_onScroll);
+    _mainScrollController.removeListener(_onScrollEnd);
     _mainScrollController.dispose();
+
     _modalCircleScrollController.dispose();
     _modalSquareScrollController.dispose();
     _modalCrossScrollController.dispose();
@@ -93,16 +75,6 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
 
     _viewModel.dispose();
     super.dispose();
-  }
-
-  void scrollToIndex(ScrollController controller, int index) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.animateTo(
-        (index - ConfigValues.listTileOffset) * listTileHeight,
-        duration: const Duration(milliseconds: ConfigValues.durationTime),
-        curve: Curves.easeInOut,
-      );
-    });
   }
 
   @override
@@ -143,36 +115,12 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
               itemBuilder: (context, index) {
                 final FibonacciItem item = fibonacciList.items[index];
 
-                return Container(
-                  color: popItemId == item.id
-                      ? ColorStyle.popHighlight
-                      : ColorStyle.listTile,
-                  height: listTileHeight,
-                  alignment: Alignment.center,
-                  child: ListTile(
-                    onTap: () => _viewModel.addItemToList(item),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 3,
-                      horizontal: 16,
-                    ),
-                    leading: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: ColorStyle.symbol,
-                        shape: BoxShape.circle,
-                      ),
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: ColorStyle.listTile,
-                        child: Text('${item.id}'),
-                      ),
-                    ),
-                    title: Text('Number: ${item.value}'),
-                    trailing: Icon(
-                      PatternSet.getSymbol(item.symbol),
-                      color: ColorStyle.symbol,
-                    ),
-                  ),
+                return CommonListTile(
+                  item: item,
+                  listTileHeight: listTileHeight,
+                  onPressed: () => _viewModel.addItemToList(item),
+                  highlightId: popItemId,
+                  highlightColor: ColorStyle.popHighlight,
                 );
               },
             );
@@ -180,6 +128,39 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
         },
       ),
     );
+  }
+
+  void subscribeStream() {
+    _circleStreamSubscription =
+        _viewModel.circleListStream.listen((FibonacciListWrapper fibList) {
+      showModalList(fibList, _modalCircleScrollController);
+      scrollToIndex(_modalCircleScrollController, fibList.itemIndex!);
+      debugPrint("circleListStream called");
+    });
+
+    _squareStreamSubscription =
+        _viewModel.squareListStream.listen((FibonacciListWrapper fibList) {
+      showModalList(fibList, _modalSquareScrollController);
+      scrollToIndex(_modalSquareScrollController, fibList.itemIndex!);
+      debugPrint("squareListStream called");
+    });
+
+    _crossStreamSubscription =
+        _viewModel.crossListStream.listen((FibonacciListWrapper fibList) {
+      showModalList(fibList, _modalCrossScrollController);
+      scrollToIndex(_modalCrossScrollController, fibList.itemIndex!);
+      debugPrint("crossListStream called");
+    });
+  }
+
+  void scrollToIndex(ScrollController controller, int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateTo(
+        (index - ConfigValues.listTileOffset) * listTileHeight,
+        duration: const Duration(milliseconds: ConfigValues.durationTime),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   void showModalList(
@@ -203,40 +184,16 @@ class _FibonacciListScreenState extends State<FibonacciListScreen> {
             itemBuilder: (context, index) {
               final FibonacciItem item = fibList.items[index];
 
-              return Container(
-                color: fibList.selectedId == item.id
-                    ? ColorStyle.pushHighlight
-                    : null,
-                height: listTileHeight,
-                alignment: Alignment.center,
-                child: ListTile(
-                  onTap: () {
-                    _viewModel.removeItemFromList(item);
-                    Navigator.pop(context);
-                    debugPrint("Remove idx back: $index => ${item.value}");
-                  },
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 3,
-                    horizontal: 16,
-                  ),
-                  leading: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: ColorStyle.symbol,
-                      shape: BoxShape.circle,
-                    ),
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: ColorStyle.listTile,
-                      child: Text('${item.id}'),
-                    ),
-                  ),
-                  title: Text('Number: ${item.value}'),
-                  trailing: Icon(
-                    PatternSet.getSymbol(item.symbol),
-                    color: ColorStyle.symbol,
-                  ),
-                ),
+              return CommonListTile(
+                item: item,
+                listTileHeight: listTileHeight,
+                onPressed: () {
+                  _viewModel.removeItemFromList(item);
+                  Navigator.pop(context);
+                  debugPrint("Remove idx back: $index => ${item.value}");
+                },
+                highlightId: fibList.selectedId,
+                highlightColor: ColorStyle.pushHighlight,
               );
             },
           ),
